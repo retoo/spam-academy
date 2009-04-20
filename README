@@ -1,0 +1,18 @@
+The Spam Academy script lets your IMAP user to train your 
+Spamasassin Bayes filter.
+
+The script works like.
+ 1. Iterate over all folders in /home/
+    2. See if there's a .spam_academy flag file in the users folder
+    3. if not the script continues with the next folder 
+    4. the script then setuid's to this user
+    5. if not already existing it creates a folder structure in 
+       the users folders:
+        SA/{Ham,Spam}/{todo,done}
+        (the current version uses german names)
+    6. all mails in Ham/todo are feeded to sa-learn --ham and 
+       then moved to the done folder
+    7. all mails in Spam/todo are feeded to spamassassin -r 
+       and then moved to the done folder
+
+The script is not yet finished!
