@@ -48,7 +48,7 @@ def change_to_user(user):
 
 LOG_DIR = "/var/tmp/log-sa"
 HOME = "test"
-FLAG = ".spamcademy"
+FLAG = ".spam_academy"
 
 for user in os.listdir(HOME):
   path = HOME + "/" + user
