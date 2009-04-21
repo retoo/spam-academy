@@ -14,5 +14,6 @@ The script works like.
        then moved to the done folder
     7. all mails in Spam/todo are feeded to spamassassin -r 
        and then moved to the done folder
+    8. logs are being kept in $HOME/.sa/log/
 
 The script is not yet finished!

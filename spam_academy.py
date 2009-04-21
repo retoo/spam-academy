@@ -46,8 +46,7 @@ def change_to_user(user):
   os.environ['HOME'] = path
 
 
-LOG_DIR = "/var/tmp/log-sa"
-HOME = "test"
+HOME = "/home/"
 FLAG = ".spam_academy"
 
 for user in os.listdir(HOME):
@@ -132,9 +131,11 @@ for user in os.listdir(HOME):
       std_out.flush()
       std_err.flush()
 
-      mail_log   = file(LOG_DIR + "/" + key + "_mail.log", "w")
-      stdout_log = file(LOG_DIR + "/" + key + "_stdout.log", "w")
-      stderr_log = file(LOG_DIR + "/" + key + "_stderr.log", "w")
+      log_dir = path + "/.sa/log/" + key
+      os.makedirs(log_dir)
+      mail_log   = file(log_dir + "/mail.log", "w")
+      stdout_log = file(log_dir + "/stdout.log", "w")
+      stderr_log = file(log_dir + "/stderr.log", "w")
 
       std_out.seek(0)
       std_err.seek(0)
