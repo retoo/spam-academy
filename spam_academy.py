@@ -74,76 +74,79 @@ for user in os.listdir(HOME):
 
     continue
 
-  change_to_user(user)
+  try:
+    change_to_user(user)
 
-  maildir_path = path + "/.maildir/"
+    maildir_path = path + "/.maildir/"
 
-  if not os.path.exists(maildir_path):
-    log.warn("%s doesn't have a maildir" % user)
-    sys.exit(0)
-
-  maildir = Maildir(maildir_path, factory=None)
-
-  spam_open    = maildir.add_folder('SA.Spam.' + FOLDER_OPEN)
-  spam_learend = maildir.add_folder('SA.Spam.' + FOLDER_LEARNED)
-  ham_open     = maildir.add_folder('SA.Ham.'  + FOLDER_OPEN)
-  ham_learned  = maildir.add_folder('SA.Ham.'  + FOLDER_LEARNED)
-
-  jobs = (
-    ('spam', ('spamassassin', '-r', '-D' ), spam_open, spam_learend),
-    ('ham',  ('sa-learn', '--ham', '-D' ), ham_open, ham_learned)
-  )
-
-
-  for desc, cmd, mbox_todo, mbox_done in jobs:
-    log.info  ("User %s: processing %s" % (user, desc))
-
-    for key, msg in mbox_todo.items():
-      # store mail in a temporary file
-      mail = NamedTemporaryFile()
-      g = Generator(mail, mangle_from_=False, maxheaderlen=0)
-      g.flatten(msg)
-
-      mail.flush()
-      mail.seek(0)
-
-      # move the mail to the learned folder
-      mbox_done.add(msg)
-      mbox_todo.discard(key)
-
-      std_out = NamedTemporaryFile()
-      std_err = NamedTemporaryFile()
-
-
-      start = time.time()
-      p = subprocess.Popen(cmd, stdin=mail, stdout=std_out, stderr=std_out, cwd=path)
-
-      ret = p.wait()
-      duration = time.time() - start
-
-      log.debug("User %s: cmd: %s ret: %i duration: %i msg: %s" % (user, str(cmd), ret, duration, key))
-
-      std_out.flush()
-      std_err.flush()
-
-      log_dir = path + "/.sa/log/" + key
-      os.makedirs(log_dir)
-      mail_log   = file(log_dir + "/mail.log", "w")
-      stdout_log = file(log_dir + "/stdout.log", "w")
-      stderr_log = file(log_dir + "/stderr.log", "w")
-
-      std_out.seek(0)
-      std_err.seek(0)
-      mail.seek(0)
-      mail_log.write(mail.read())
-      stdout_log.write(std_out.read())
-      stderr_log.write(std_err.read())
-
-      for fh in std_err, std_out, mail, mail_log, stdout_log, stderr_log:
-        fh.close()
-
+    if not os.path.exists(maildir_path):
+      log.warn("%s doesn't have a maildir" % user)
       sys.exit(0)
-  # end children here
+
+    maildir = Maildir(maildir_path, factory=None)
+
+    spam_open    = maildir.add_folder('SA.Spam.' + FOLDER_OPEN)
+    spam_learend = maildir.add_folder('SA.Spam.' + FOLDER_LEARNED)
+    ham_open     = maildir.add_folder('SA.Ham.'  + FOLDER_OPEN)
+    ham_learned  = maildir.add_folder('SA.Ham.'  + FOLDER_LEARNED)
+
+    jobs = (
+      ('spam', ('spamassassin', '-r', '-D' ), spam_open, spam_learend),
+      ('ham',  ('sa-learn', '--ham', '-D' ), ham_open, ham_learned)
+    )
+
+
+    for desc, cmd, mbox_todo, mbox_done in jobs:
+      log.info  ("User %s: processing %s" % (user, desc))
+
+      for key, msg in mbox_todo.items():
+        # store mail in a temporary file
+        mail = NamedTemporaryFile()
+        g = Generator(mail, mangle_from_=False, maxheaderlen=0)
+        g.flatten(msg)
+
+        mail.flush()
+        mail.seek(0)
+
+        # move the mail to the learned folder
+        mbox_done.add(msg)
+        mbox_todo.discard(key)
+
+        std_out = NamedTemporaryFile()
+        std_err = NamedTemporaryFile()
+
+
+        start = time.time()
+        p = subprocess.Popen(cmd, stdin=mail, stdout=std_out, stderr=std_out, cwd=path)
+
+        ret = p.wait()
+        duration = time.time() - start
+
+        log.debug("User %s: cmd: %s ret: %i duration: %i msg: %s" % (user, str(cmd), ret, duration, key))
+
+        std_out.flush()
+        std_err.flush()
+
+        log_dir = path + "/.sa/log/" + key
+        os.makedirs(log_dir)
+        mail_log   = file(log_dir + "/mail.log", "w")
+        stdout_log = file(log_dir + "/stdout.log", "w")
+        stderr_log = file(log_dir + "/stderr.log", "w")
+
+        std_out.seek(0)
+        std_err.seek(0)
+        mail.seek(0)
+        mail_log.write(mail.read())
+        stdout_log.write(std_out.read())
+        stderr_log.write(std_err.read())
+
+        for fh in std_err, std_out, mail, mail_log, stdout_log, stderr_log:
+          fh.close()
+
+    # end children here
+  except:
+    log.exception("Error during child run for %s" % user)
+    raise
   sys.exit(0)
 
 
