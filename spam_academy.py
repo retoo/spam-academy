@@ -63,10 +63,14 @@ for user in os.listdir(HOME):
     (pid_c, status) = os.waitpid(pid, 0)
     ret = status >> 8
     log.debug("child returned with status %i" % ret)
+
+    if ret != 0:
+      log.critical("child returned with error, aborting!")
+      sys.exit(ret)
+
     continue
 
   change_to_user(user)
-
 
   maildir_path = path + "/.maildir/"
 
