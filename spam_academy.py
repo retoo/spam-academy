@@ -49,6 +49,10 @@ def change_to_user(user):
 
 HOME = "/home/"
 FLAG = ".spam_academy"
+FOLDER_OPEN = "offen"
+FOLDER_LEARNED = "gelernt"
+# FOLDER_OPEN = "todo"
+# FOLDER_LEARNED = "done"
 
 for user in os.listdir(HOME):
   path = HOME + "/" + user
@@ -80,24 +84,10 @@ for user in os.listdir(HOME):
 
   maildir = Maildir(maildir_path, factory=None)
 
-  if "SA" not in maildir.list_folders():
-    log.info("Creating structure for user %s" % user)
-    # create initial structure
-    sa = maildir.add_folder("SA")
-    spam = sa.add_folder("Spam")
-    ham  = sa.add_folder("Ham")
-
-    for d in spam, ham:
-      d.add_folder("offen")
-      d.add_folder("gelernt")
-
-  sa = maildir.add_folder("SA")
-  spam_open    = sa.get_folder('Spam').get_folder('offen')
-  spam_learend = sa.get_folder('Spam').get_folder('gelernt')
-
-  ham_open     = sa.get_folder('Ham').get_folder('offen')
-  ham_learned  = sa.get_folder('Ham').get_folder('gelernt')
-
+  spam_open    = maildir.add_folder('SA.Spam.' + FOLDER_OPEN)
+  spam_learend = maildir.add_folder('SA.Spam.' + FOLDER_LEARNED)
+  ham_open     = maildir.add_folder('SA.Ham.'  + FOLDER_OPEN)
+  ham_learned  = maildir.add_folder('SA.Ham.'  + FOLDER_LEARNED)
 
   jobs = (
     ('spam', ('spamassassin', '-r', '-D' ), spam_open, spam_learend),
